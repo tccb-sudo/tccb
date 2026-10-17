@@ -1,4 +1,18 @@
-# Tên phải TRÙNG với tên Worker bạn đã tạo trên Cloudflare, nếu không bản build sẽ báo lỗi.
+# ============================================================
+# MỘT THƯ MỤC (tccb) — 25 WORKER
+# Mọi Worker trên Cloudflare nối vào CÙNG thư mục này, chỉ khác Deploy command:
+#   Worker "tccb" (chính) : npx wrangler deploy
+#   Worker khác, vd "tv"  : npx wrangler deploy --env tv
+#
+# THÊM WORKER MỚI tên <x> (tạo Worker <x> trên Cloudflare TRƯỚC):
+#   1) Thêm 3 dòng vào phần "Các Worker con":
+#        [env.<x>]
+#        name = "<x>"
+#        triggers = { crons = [] }
+#   2) Thêm 1 khối [[services]] WARM_<x> ở phần "Đánh thức" (để <x> cũng được giữ ấm)
+#   3) Worker <x> → Settings → Build: Deploy command = npx wrangler deploy --env <x>
+# Biến APPS_SCRIPT_URL / PROXY_KEY đặt riêng trên từng Worker (keep_vars giữ nguyên khi deploy).
+# ============================================================
 name = "tccb"
 main = "src/worker.js"
 compatibility_date = "2026-09-01"
@@ -11,6 +25,225 @@ directory = "./public"
 binding = "ASSETS"
 run_worker_first = ["/api"]
 
-# Giữ Apps Script luôn "ấm": cứ 5 phút gọi nhẹ 1 lần, 7h00–18h59 giờ Việt Nam (0h–11h UTC)
+# Gói miễn phí chỉ cho 5 lịch/tài khoản → CHỈ Worker tccb có lịch.
+# Cứ 5 phút, 7h00–18h59 giờ Việt Nam (0h–11h UTC), tccb đánh thức Apps Script của CẢ 25 đơn vị.
 [triggers]
 crons = ["*/5 0-11 * * *"]
+
+# ----- Đánh thức: tccb gọi Worker con qua service binding (không mở ra Internet) -----
+[[services]]
+binding = "WARM_ttgdyh"
+service = "ttgdyh"
+entrypoint = "Warm"
+
+[[services]]
+binding = "WARM_tv"
+service = "tv"
+entrypoint = "Warm"
+
+[[services]]
+binding = "WARM_ttcntt"
+service = "ttcntt"
+entrypoint = "Warm"
+
+[[services]]
+binding = "WARM_tcyh"
+service = "tcyh"
+entrypoint = "Warm"
+
+[[services]]
+binding = "WARM_pctsv"
+service = "pctsv"
+entrypoint = "Warm"
+
+[[services]]
+binding = "WARM_ktx"
+service = "ktx"
+entrypoint = "Warm"
+
+[[services]]
+binding = "WARM_pkhcn"
+service = "pkhcn"
+entrypoint = "Warm"
+
+[[services]]
+binding = "WARM_pdbcl"
+service = "pdbcl"
+entrypoint = "Warm"
+
+[[services]]
+binding = "WARM_phtqt"
+service = "phtqt"
+entrypoint = "Warm"
+
+[[services]]
+binding = "WARM_pttpc"
+service = "pttpc"
+entrypoint = "Warm"
+
+[[services]]
+binding = "WARM_pdtdh"
+service = "pdtdh"
+entrypoint = "Warm"
+
+[[services]]
+binding = "WARM_pdtsdh"
+service = "pdtsdh"
+entrypoint = "Warm"
+
+[[services]]
+binding = "WARM_pqtgt"
+service = "pqtgt"
+entrypoint = "Warm"
+
+[[services]]
+binding = "WARM_phcth"
+service = "phcth"
+entrypoint = "Warm"
+
+[[services]]
+binding = "WARM_ddktyh"
+service = "ddktyh"
+entrypoint = "Warm"
+
+[[services]]
+binding = "WARM_kkhcb"
+service = "kkhcb"
+entrypoint = "Warm"
+
+[[services]]
+binding = "WARM_krhm"
+service = "krhm"
+entrypoint = "Warm"
+
+[[services]]
+binding = "WARM_kyhct"
+service = "kyhct"
+entrypoint = "Warm"
+
+[[services]]
+binding = "WARM_kytcc"
+service = "kytcc"
+entrypoint = "Warm"
+
+[[services]]
+binding = "WARM_ttdt"
+service = "ttdt"
+entrypoint = "Warm"
+
+[[services]]
+binding = "WARM_ttkc"
+service = "ttkc"
+entrypoint = "Warm"
+
+[[services]]
+binding = "WARM_ttkhcn"
+service = "ttkhcn"
+entrypoint = "Warm"
+
+[[services]]
+binding = "WARM_ttyshpt"
+service = "ttyshpt"
+entrypoint = "Warm"
+
+[[services]]
+binding = "WARM_pkhtc"
+service = "pkhtc"
+entrypoint = "Warm"
+
+# ----- Các Worker con (tên phải trùng tên Worker trên Cloudflare; không có lịch riêng) -----
+[env.ttgdyh]
+name = "ttgdyh"
+triggers = { crons = [] }
+
+[env.tv]
+name = "tv"
+triggers = { crons = [] }
+
+[env.ttcntt]
+name = "ttcntt"
+triggers = { crons = [] }
+
+[env.tcyh]
+name = "tcyh"
+triggers = { crons = [] }
+
+[env.pctsv]
+name = "pctsv"
+triggers = { crons = [] }
+
+[env.ktx]
+name = "ktx"
+triggers = { crons = [] }
+
+[env.pkhcn]
+name = "pkhcn"
+triggers = { crons = [] }
+
+[env.pdbcl]
+name = "pdbcl"
+triggers = { crons = [] }
+
+[env.phtqt]
+name = "phtqt"
+triggers = { crons = [] }
+
+[env.pttpc]
+name = "pttpc"
+triggers = { crons = [] }
+
+[env.pdtdh]
+name = "pdtdh"
+triggers = { crons = [] }
+
+[env.pdtsdh]
+name = "pdtsdh"
+triggers = { crons = [] }
+
+[env.pqtgt]
+name = "pqtgt"
+triggers = { crons = [] }
+
+[env.phcth]
+name = "phcth"
+triggers = { crons = [] }
+
+[env.ddktyh]
+name = "ddktyh"
+triggers = { crons = [] }
+
+[env.kkhcb]
+name = "kkhcb"
+triggers = { crons = [] }
+
+[env.krhm]
+name = "krhm"
+triggers = { crons = [] }
+
+[env.kyhct]
+name = "kyhct"
+triggers = { crons = [] }
+
+[env.kytcc]
+name = "kytcc"
+triggers = { crons = [] }
+
+[env.ttdt]
+name = "ttdt"
+triggers = { crons = [] }
+
+[env.ttkc]
+name = "ttkc"
+triggers = { crons = [] }
+
+[env.ttkhcn]
+name = "ttkhcn"
+triggers = { crons = [] }
+
+[env.ttyshpt]
+name = "ttyshpt"
+triggers = { crons = [] }
+
+[env.pkhtc]
+name = "pkhtc"
+triggers = { crons = [] }
