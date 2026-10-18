@@ -1,23 +1,8 @@
-# ============================================================
-# MỘT THƯ MỤC (tccb) — 25 WORKER
-# Mọi Worker trên Cloudflare nối vào CÙNG thư mục này, chỉ khác Deploy command:
-#   Worker "tccb" (chính) : npx wrangler deploy
-#   Worker khác, vd "tv"  : npx wrangler deploy --env tv
-#
-# THÊM WORKER MỚI tên <x> (tạo Worker <x> trên Cloudflare TRƯỚC):
-#   1) Thêm 3 dòng vào phần "Các Worker con":
-#        [env.<x>]
-#        name = "<x>"
-#        triggers = { crons = [] }
-#   2) Thêm 1 khối [[services]] WARM_<x> ở phần "Đánh thức" (để <x> cũng được giữ ấm)
-#   3) Worker <x> → Settings → Build: Deploy command = npx wrangler deploy --env <x>
-# Biến APPS_SCRIPT_URL / PROXY_KEY đặt riêng trên từng Worker (keep_vars giữ nguyên khi deploy).
-# ============================================================
 name = "tccb"
 main = "src/worker.js"
 compatibility_date = "2026-09-01"
 
-# Giữ nguyên các biến đã đặt trên dashboard mỗi lần deploy
+# Giữ nguyên các biến (APPS_SCRIPT_URL, PROXY_KEY) đã đặt trên dashboard mỗi lần deploy
 keep_vars = true
 
 [assets]
@@ -25,12 +10,13 @@ directory = "./public"
 binding = "ASSETS"
 run_worker_first = ["/api"]
 
-# Gói miễn phí chỉ cho 5 lịch/tài khoản → CHỈ Worker tccb có lịch.
-# Cứ 5 phút, 7h00–18h59 giờ Việt Nam (0h–11h UTC), tccb đánh thức Apps Script của CẢ 25 đơn vị.
+# CHỈ Worker tccb có lịch (gói miễn phí tối đa 5 lịch/tài khoản).
+# Cứ 5 phút, 7h00–18h59 giờ Việt Nam (0h–11h UTC): đánh thức Apps Script của tccb
+# và của mọi Worker con khai báo bên dưới (kết nối nội bộ Cloudflare, không mở ra Internet).
+# Thêm Worker con mới tên <x>: tạo Worker <x> trên Cloudflare trước, rồi thêm 1 khối [[services]] như dưới.
 [triggers]
 crons = ["*/5 0-11 * * *"]
 
-# ----- Đánh thức: tccb gọi Worker con qua service binding (không mở ra Internet) -----
 [[services]]
 binding = "WARM_ttgdyh"
 service = "ttgdyh"
@@ -150,100 +136,3 @@ entrypoint = "Warm"
 binding = "WARM_pkhtc"
 service = "pkhtc"
 entrypoint = "Warm"
-
-# ----- Các Worker con (tên phải trùng tên Worker trên Cloudflare; không có lịch riêng) -----
-[env.ttgdyh]
-name = "ttgdyh"
-triggers = { crons = [] }
-
-[env.tv]
-name = "tv"
-triggers = { crons = [] }
-
-[env.ttcntt]
-name = "ttcntt"
-triggers = { crons = [] }
-
-[env.tcyh]
-name = "tcyh"
-triggers = { crons = [] }
-
-[env.pctsv]
-name = "pctsv"
-triggers = { crons = [] }
-
-[env.ktx]
-name = "ktx"
-triggers = { crons = [] }
-
-[env.pkhcn]
-name = "pkhcn"
-triggers = { crons = [] }
-
-[env.pdbcl]
-name = "pdbcl"
-triggers = { crons = [] }
-
-[env.phtqt]
-name = "phtqt"
-triggers = { crons = [] }
-
-[env.pttpc]
-name = "pttpc"
-triggers = { crons = [] }
-
-[env.pdtdh]
-name = "pdtdh"
-triggers = { crons = [] }
-
-[env.pdtsdh]
-name = "pdtsdh"
-triggers = { crons = [] }
-
-[env.pqtgt]
-name = "pqtgt"
-triggers = { crons = [] }
-
-[env.phcth]
-name = "phcth"
-triggers = { crons = [] }
-
-[env.ddktyh]
-name = "ddktyh"
-triggers = { crons = [] }
-
-[env.kkhcb]
-name = "kkhcb"
-triggers = { crons = [] }
-
-[env.krhm]
-name = "krhm"
-triggers = { crons = [] }
-
-[env.kyhct]
-name = "kyhct"
-triggers = { crons = [] }
-
-[env.kytcc]
-name = "kytcc"
-triggers = { crons = [] }
-
-[env.ttdt]
-name = "ttdt"
-triggers = { crons = [] }
-
-[env.ttkc]
-name = "ttkc"
-triggers = { crons = [] }
-
-[env.ttkhcn]
-name = "ttkhcn"
-triggers = { crons = [] }
-
-[env.ttyshpt]
-name = "ttyshpt"
-triggers = { crons = [] }
-
-[env.pkhtc]
-name = "pkhtc"
-triggers = { crons = [] }
