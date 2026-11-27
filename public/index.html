@@ -264,6 +264,10 @@
     .status-pending { display:inline-flex; align-items:center; gap:4px; background:#fffbeb; color:#92400e; font-size:11px; font-weight:700; padding:4px 10px; border-radius:50px; white-space:nowrap; }
     .row-done td { background: #f0fdf4 !important; }
     .row-done td:first-child { background: #dcfce7 !important; }
+    .status-auto { display:inline-flex; align-items:center; gap:4px; background:#e0f2fe; color:#075985; font-size:11px; font-weight:700; padding:4px 10px; border-radius:50px; white-space:nowrap; }
+    .row-auto td { background: #f0f9ff !important; }
+    .row-auto td:first-child { background: #e0f2fe !important; }
+    .row-auto .mgr-input, .row-auto .mgr-select, .row-auto .mgr-note-input { background:#f1f5f9; color:#334155; cursor:not-allowed; }
     .mgr-input, .mgr-select, .mgr-note-input { min-height: 0; padding: 6px; border: 1.5px solid var(--gray-200); border-radius: 6px; font-size: 13px; font-family: inherit; }
     .mgr-input { width: 70px; text-align: center; }
     .mgr-select { width: 70px; padding-right: 22px; background-position: right 6px center; }
@@ -652,7 +656,7 @@
 
     <footer>
       <p><b>PHIẾU TỰ ĐÁNH GIÁ HIỆU QUẢ CÔNG VIỆC TRỰC TUYẾN</b></p>
-      <p>© 2026 Phòng Tổ chức - Nhân sự · <span style="opacity:.6;">phiên bản 2026.11.03</span></p>
+      <p>© 2026 Phòng Tổ chức - Nhân sự · <span style="opacity:.6;">phiên bản 2026.11.27</span></p>
     </footer>
   </div>
 </div>
@@ -710,7 +714,7 @@ const PAGE_LABELS = {
   'page-hr-detail':    { title:'Chi tiết đơn vị', sub:'Danh sách VC-NLĐ theo đơn vị' }
 };
 
-const APP_VERSION = '2026.11.03';
+const APP_VERSION = '2026.11.27';
 // Trình duyệt nội bộ của Zalo/Facebook/… chèn mã riêng vào trang và mã đó có thể báo lỗi (vd. "zaloJSV2" is not defined).
 // Đó không phải lỗi của ứng dụng nên không hiện banner.
 const FOREIGN_ERR = /zaloJSV|ZaloJS|WebViewJavascriptBridge|ReactNativeWebView|webkit\.messageHandlers|__gCrWeb|FBNavAll|^Script error\.?$/i;
@@ -769,7 +773,7 @@ function showError(err) { if (!err || !err.handled) alert('⚠️ ' + (err && er
 // ------------------------------------------------------------
 // Kiểm tra dữ liệu máy chủ trả về + phiên bản Apps Script
 // ------------------------------------------------------------
-const API_REQUIRED = '2026.10.31b';       // Code.gs phải có API_VERSION ≥ số này
+const API_REQUIRED = '2026.11.27';       // Code.gs phải có API_VERSION ≥ số này
 const isUser = u => !!u && typeof u === 'object' && typeof u.hoTen === 'string' && typeof u.role === 'string';
 const SHAPE = {
   login:      d => !!d && (d.multiUnit ? Array.isArray(d.donViList) : d.otpRequired ? !!d.otpId : (!!d.token && isUser(d.user))),
@@ -2123,10 +2127,12 @@ function growNote(el) { el.style.height = 'auto'; el.style.height = Math.min(220
 function mgrInputs(item) {
   const opt = g => `<option value="${g}"${item.sepLoai === g ? ' selected' : ''}>${g}</option>`;
   const done = !!item.sepLoai;
-  return `<td><input type="text" inputmode="decimal" class="mgr-input" value="${cell(item.sepDiem)}" oninput="autoGrade(this)"></td>
-    <td><select class="mgr-select"><option value="">--</option>${GRADES.map(opt).join('')}</select></td>
-    <td class="cell-note"><textarea class="mgr-note-input" rows="2" maxlength="1000" placeholder="Nhận xét của Trưởng đơn vị (tối đa 1000 ký tự)…" oninput="growNote(this)">${esc(item.sepGhiChu)}</textarea></td>
-    <td>${done ? '<span class="status-done">✅ Đã đánh giá</span>' : '<span class="status-pending">⏳ Chờ đánh giá</span>'}</td>`;
+  const lock = item.tuDuyet ? ' disabled' : '';   // phiếu tự duyệt: chỉ xem
+  return `<td><input type="text" inputmode="decimal" class="mgr-input" value="${cell(item.sepDiem)}" oninput="autoGrade(this)"${lock}></td>
+    <td><select class="mgr-select"${lock}><option value="">--</option>${GRADES.map(opt).join('')}</select></td>
+    <td class="cell-note"><textarea class="mgr-note-input" rows="2" maxlength="1000" placeholder="Nhận xét của Trưởng đơn vị (tối đa 1000 ký tự)…" oninput="growNote(this)"${item.tuDuyet ? ' readonly' : ''}>${esc(item.sepGhiChu)}</textarea></td>
+    <td>${item.tuDuyet ? '<span class="status-auto" title="Điểm tự chấm được chuyển thẳng sang cột Trưởng đơn vị chấm, không cần chấm">🤖 Tự động duyệt</span>'
+        : done ? '<span class="status-done">✅ Đã đánh giá</span>' : '<span class="status-pending">⏳ Chờ đánh giá</span>'}</td>`;
 }
 
 function mgrRowV1(item) {
@@ -2141,10 +2147,11 @@ function mgrRowV2(item) {
   const d = item.diem || {};
   const bold = ' style="background:var(--gray-50);font-weight:700;"';
   const proposed = Number(item.thuong) || 0;
-  const bonusCell = proposed > 0
+  const bonusCell = item.tuDuyet ? `<span class="muted-sm">${fmt(item.sepThuong === '' ? proposed : item.sepThuong)}</span>`
+    : proposed > 0
     ? `<input type="text" inputmode="decimal" class="mgr-input mgr-bonus" placeholder="${fmt(proposed)}" value="${item.sepThuong === '' ? '' : fmt(item.sepThuong)}" oninput="mgrBonusChanged(this)" title="0 – ${fmt(proposed)} điểm">`
     : '<span class="muted-sm">0</span>';
-  return `<tr class="${item.sepLoai ? 'row-done' : ''}" data-v2="1" data-row="${esc(item.rowId)}" data-msnv="${esc(item.msnv)}" data-name="${esc(item.hoTen)}" data-loai="${esc(item.loaiPhieu || '')}" data-donvi="${esc(item.donVi || '')}"
+  return `<tr class="${item.tuDuyet ? 'row-auto' : item.sepLoai ? 'row-done' : ''}" ${item.tuDuyet ? 'data-auto="1" ' : ''}data-v2="1" data-row="${esc(item.rowId)}" data-msnv="${esc(item.msnv)}" data-name="${esc(item.hoTen)}" data-loai="${esc(item.loaiPhieu || '')}" data-donvi="${esc(item.donVi || '')}"
       data-kpi="${esc(item.tongKpi)}" data-proposed="${proposed}" data-ii1="${esc(d.ii1)}" data-ii2="${esc(d.ii2)}" data-ii3="${esc(d.ii3)}">
     <td>${esc(item.hoTen)}${loaiTag(item)}</td>
     <td style="font-size:12px;">${esc(item.donVi || '')}</td>
@@ -2199,6 +2206,7 @@ async function saveAllEvaluations() {
   const items = [];
   let bad = null;
   document.querySelectorAll('#staff-table-body tr[data-row]').forEach(tr => {
+    if (tr.dataset.auto) return;   // phiếu tự duyệt: chỉ xem, không gửi lên
     const scoreEl = tr.querySelector('.mgr-input:not(.mgr-bonus)');
     const bonusEl = tr.querySelector('.mgr-bonus');
     const grade = tr.querySelector('.mgr-select').value;
